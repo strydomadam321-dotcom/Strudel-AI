@@ -1,0 +1,14 @@
+{
+  "name": "ai-chatbox",
+  "version": "1.0.0",
+  "description": "A simple website chatbox that talks to Claude or Gemini",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}
