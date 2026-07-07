@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strudel AI — talk to Claude or Gemini</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============ LOGIN / SIGN UP ============ -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="brand">
+        <span class="brand-mark">🥨</span>
+        <h1>Strudel AI</h1>
+      </div>
+      <p class="auth-tagline">powered by Claude & Gemini</p>
+
+      <form class="auth-form" id="authForm">
+        <div class="field" id="displayNameField" style="display:none">
+          <label for="authDisplayName">Display name (optional)</label>
+          <input id="authDisplayName" type="text" autocomplete="nickname" placeholder="What should we call you?" />
+        </div>
+        <div class="field">
+          <label for="authUsername">Username</label>
+          <input id="authUsername" type="text" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="authPassword">Password</label>
+          <input id="authPassword" type="password" autocomplete="current-password" required />
+        </div>
+        <div class="field" id="confirmPasswordField" style="display:none">
+          <label for="authConfirmPassword">Confirm password</label>
+          <input id="authConfirmPassword" type="password" autocomplete="new-password" />
+        </div>
+
+        <p class="auth-error" id="authError"></p>
+        <button type="submit" id="authSubmit">Log in</button>
+      </form>
+
+      <p class="auth-switch">
+        <span id="authSwitchText">Don't have an account?</span>
+        <button type="button" id="authSwitchBtn">Sign up</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div class="app" id="app" hidden>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="brand brand--small">
+          <span class="brand-mark">🥨</span>
+          <h1>Strudel AI</h1>
+        </div>
+        <button class="new-chat-btn" id="newChatBtn" type="button">+ New chat</button>
+      </div>
+
+      <nav class="conversation-list" id="conversationList" aria-label="Previous conversations"></nav>
+
+      <button class="profile-btn" id="profileBtn" type="button">
+        <span class="avatar" id="avatarInitials">?</span>
+        <span class="profile-name" id="profileName">…</span>
+        <span class="profile-gear" aria-hidden="true">⚙</span>
+      </button>
+    </aside>
+
+    <div class="main">
+      <header class="app-header">
+        <button class="menu-btn" id="menuBtn" type="button" aria-label="Toggle conversation list">☰</button>
+
+        <div class="controls">
+          <div class="station-toggle" role="group" aria-label="Choose AI provider">
+            <button class="station station--claude" data-provider="claude" type="button">
+              <span class="station-dot"></span>
+              Claude
+            </button>
+            <button class="station station--gemini active" data-provider="gemini" type="button">
+              <span class="station-dot"></span>
+              Gemini
+            </button>
+          </div>
+
+          <select id="modelSelect" class="model-select" aria-label="Choose specific model">
+            <option>Loading models…</option>
+          </select>
+        </div>
+      </header>
+
+      <main class="log" id="log"></main>
+
+      <form class="composer" id="composer">
+        <div class="composer-attachments" id="composerAttachments"></div>
+        <div class="composer-input-wrapper">
+          <button type="button" id="attachBtn" class="attach-btn" aria-label="Attach files" title="Attach files">📎</button>
+          <textarea id="input" placeholder="Message Gemini…" rows="1" autocomplete="off"></textarea>
+          <input type="file" id="fileInput" multiple style="display: none" accept="image/*,.pdf,.txt,.md,.doc,.docx" />
+        </div>
+        <button type="submit" id="sendBtn">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS MODAL ============ -->
+  <div class="modal-overlay" id="settingsOverlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="modal-close" id="settingsClose" type="button" aria-label="Close settings">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <section class="settings-section">
+          <h3>Profile</h3>
+          <div class="field">
+            <label for="settingsDisplayName">Display name</label>
+            <input id="settingsDisplayName" type="text" />
+          </div>
+          <p class="settings-hint">Username: <span id="settingsUsername"></span></p>
+        </section>
+
+        <section class="settings-section">
+          <h3>Preferences</h3>
+          <div class="field">
+            <label for="settingsTheme">Theme</label>
+            <select id="settingsTheme">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>Claude API key</h3>
+          <p class="settings-hint">
+            Gemini works right away — no setup needed. To use Claude, paste your own
+            Anthropic API key (get one at
+            <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>).
+            It's stored only in this browser and sent straight to Anthropic — it's never saved on the server.
+          </p>
+          <div class="field key-field">
+            <input id="settingsClaudeKey" type="password" placeholder="sk-ant-…" autocomplete="off" />
+            <button type="button" id="toggleKeyVisibility">show</button>
+          </div>
+        </section>
+
+        <button type="button" id="settingsSave" class="settings-save-btn">Save changes</button>
+        <p class="settings-saved-msg" id="settingsSavedMsg"></p>
+
+        <hr class="settings-divider" />
+
+        <button type="button" id="logoutBtn" class="logout-btn">Log out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CLAUDE KEY MODAL ============ -->
+  <div class="modal-overlay" id="claudeKeyOverlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add your Claude API key</h2>
+        <button class="modal-close" id="claudeKeyClose" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p>Gemini works right away, but Claude needs your own API key from Anthropic.</p>
+        <p>
+          <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get your key here</a> — it's free to create an account.
+        </p>
+        <p class="hint">Your key is stored only in this browser and sent straight to Anthropic. It's never saved on our server.</p>
+
+        <div class="field key-field">
+          <input id="claudeKeyInput" type="password" placeholder="sk-ant-…" autocomplete="off" />
+          <button type="button" id="toggleClaudeKeyVis">show</button>
+        </div>
+
+        <p class="modal-error" id="claudeKeyError"></p>
+        <button type="button" id="claudeKeySubmit" class="modal-submit-btn">Save and continue</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
